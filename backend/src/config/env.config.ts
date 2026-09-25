@@ -47,6 +47,7 @@ const EnvSchema = z
     // Stellar failover endpoints (comma-separated URLs)
     STELLAR_HORIZON_ENDPOINTS: z.string().optional(),
     SOROBAN_RPC_ENDPOINTS: z.string().optional(),
+    SOROBAN_START_LEDGER: z.coerce.number().int().nonnegative().optional().describe('Contract deployment ledger to start ingestion from'),
 
     // Redis Configuration
     REDIS_URL: z
