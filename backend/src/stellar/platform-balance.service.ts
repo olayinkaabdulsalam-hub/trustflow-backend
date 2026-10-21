@@ -8,7 +8,10 @@ import { config } from '../config/env.config';
 @Injectable()
 export class PlatformBalanceService {
   private readonly logger = new SanitizedLogger(PlatformBalanceService.name);
-  private lastAlertTime = 0;
+  private lastAlertTime: Record<'WARNING' | 'CRITICAL', number> = {
+    WARNING: 0,
+    CRITICAL: 0,
+  };
   private readonly alertCooldownMs = 3600000; // 1 hour cooldown between alerts
 
   constructor(
@@ -72,14 +75,15 @@ export class PlatformBalanceService {
     message: string,
   ): void {
     const now = Date.now();
-    if (now - this.lastAlertTime < this.alertCooldownMs) {
+    const lastAlert = this.lastAlertTime[level];
+    if (now - lastAlert < this.alertCooldownMs) {
       this.logger.debug(
-        `Alert cooldown active, skipping notification (last alert ${now - this.lastAlertTime}ms ago)`,
+        `Alert cooldown active for ${level}, skipping notification (last alert ${now - lastAlert}ms ago)`,
       );
       return;
     }
 
-    this.lastAlertTime = now;
+    this.lastAlertTime[level] = now;
     this.logger.warn(message);
 
     this.webhookService
